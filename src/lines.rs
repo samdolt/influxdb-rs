@@ -166,7 +166,7 @@ impl LinesBuilderWithFields {
 }
 
 impl<'a> Lines {
-    fn new() -> Lines {
+    pub fn new() -> Lines {
        Lines {
            buf: String::with_capacity(100),
        }
