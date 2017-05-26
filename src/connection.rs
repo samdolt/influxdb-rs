@@ -95,7 +95,7 @@ impl Connection {
 
     }
 
-    fn write(self, lines: &Lines) -> Result<(),()> {
+    pub fn write(self, lines: &Lines) -> Result<(),()> {
         let url = self.url.join(&format!("write?db={}", self.db)).unwrap();
         let response = self.client.post(url).body(lines.as_str()).send();
 
