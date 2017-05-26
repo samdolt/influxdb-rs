@@ -105,7 +105,9 @@ impl LinesBuilder {
 
         obj.buf.reserve(100);
 
-        obj.buf.push('\n');
+        if obj.buf != "" {
+            obj.buf.push('\n');
+        }
         obj.init(&name);
         obj
     }
@@ -164,6 +166,12 @@ impl LinesBuilderWithFields {
 }
 
 impl<'a> Lines {
+    fn new() -> Lines {
+       Lines {
+           buf: String::with_capacity(100),
+       }
+    }
+
     fn from_line_builder_with_fields(builder: LinesBuilderWithFields) -> Lines {
         Lines {
             buf: builder.buf
