@@ -1,0 +1,10 @@
+[package]
+name = "influxdb"
+version = "0.1.0"
+authors = ["Samuel Dolt <samuel@dolt.ch>"]
+
+[dependencies]
+reqwest = "0.6.2"
+hyper = "0.10"
+url = "1.4.0"
+semver = "0.7.0"
