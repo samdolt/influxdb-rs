@@ -6,6 +6,7 @@ use reqwest::get;
 use reqwest::StatusCode;
 use reqwest::Client;
 
+use slog::Logger;
 
 
 use ::headers::XInfluxDbVersion;
@@ -21,6 +22,7 @@ pub struct Connection {
     version: Version,
     client: Client,
     db: String,
+    logger: Logger,
 }
 
 impl Connection {
@@ -101,12 +103,17 @@ impl Connection {
             None    => return Err(()),
         };
 
+        let logger = params.logger.new(o!("influx-version" => version.to_string()));
+
+        info!(logger, "Connected to influxdb");
+
         Ok(Connection {
             url: url.clone(),
             auth: auth,
             version: version,
             client: Client::new().unwrap(),
             db: db,
+            logger: logger
         })
     }
 
