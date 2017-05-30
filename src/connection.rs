@@ -127,7 +127,7 @@ impl Connection {
         info!(logger, "Connected to influxdb");
 
         Ok(Connection {
-            url: url.clone(),
+            url: base_url.clone(),
             auth: auth,
             version: version,
             client: Client::new().unwrap(),
