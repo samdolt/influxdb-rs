@@ -120,6 +120,8 @@ impl Connection {
             None    => return Err(()),
         };
 
+        info!(params.logger, "Version recupered");
+
         let logger = params.logger.new(o!("influx-version" => version.to_string()));
 
         info!(logger, "Connected to influxdb");
