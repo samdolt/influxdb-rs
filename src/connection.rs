@@ -170,6 +170,7 @@ impl Connection {
 
     pub fn write(&self, lines: &Lines) -> Result<(),()> {
         let url = self.url.join(&format!("write?db={}", self.db)).unwrap();
+        debug!(self.logger.new(o!("url" => url.to_string())), "New write url");
         let lines = lines.as_str();
         info!(self.logger, "Write lines {}", lines);
         let response = self.client.post(url).body(lines).send();
