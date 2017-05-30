@@ -56,7 +56,7 @@ impl Connection {
             Err(_) => return Err(()),
         };
 
-        info!(params.logger, "Url parsed");
+        debug!(params.logger, "Url parsed");
 
         let scheme = match url.scheme() {
             "http" => "http",
@@ -64,43 +64,43 @@ impl Connection {
             _   => return Err(()),
         };
 
-        info!(params.logger, "Scheme parsed");
+        debug!(params.logger, "Scheme parsed");
 
         let host = match url.host() {
             Some(host) => host,
             None => return Err(()),
         };
 
-        info!(params.logger, "Host parsed");
+        debug!(params.logger, "Host parsed");
 
         let port = match url.port() {
             Some(port) => port,
             None    => 8086u16,
         };
 
-        info!(params.logger, "Port parsed");
+        debug!(params.logger, "Port parsed");
 
         let username = match url.username() {
             "" => None,
             u  => Some(u.to_string())
         };
 
-        info!(params.logger, "Username parsed");
+        debug!(params.logger, "Username parsed");
 
         let password = match url.password(){
             None => None,
             Some(pw) => Some(pw.to_string()),
         };
 
-        info!(params.logger, "Username parsed");
+        debug!(params.logger, "Username parsed");
 
         let db = url.path()[1..].to_string();
 
-        info!(params.logger, "db parsed");
+        debug!(params.logger, "db parsed");
 
         // Can't fail
         let base_url = Url::parse(&format!("{}://{}:{}/", scheme, host, port )).unwrap();
-        info!(params.logger, "Base Url recreated");
+        debug!(params.logger, "Base Url recreated");
 
         let auth = match username {
             None => Credential{username: "".to_string(), password: "".to_string(), has_auth: false},
@@ -112,7 +112,7 @@ impl Connection {
             }
         };
 
-        info!(params.logger, "Auth parsed");
+        debug!(params.logger, "Auth parsed");
 
 
         let version = match Connection::_ping(&base_url, &auth) {
@@ -120,7 +120,7 @@ impl Connection {
             None    => return Err(()),
         };
 
-        info!(params.logger, "Version recupered");
+        debug!(params.logger, "Version recupered");
 
         let logger = params.logger.new(o!("influx-version" => version.to_string()));
 
