@@ -1,4 +1,6 @@
 use url::Url;
+use slog::Logger;
+use slog;
 
 pub struct Credential {
     pub username: String,
@@ -7,71 +9,36 @@ pub struct Credential {
 }
 
 pub struct ConnectParams {
-    pub url: Url,
-    pub port: u16,
-    pub credential: Credential,
-    pub db: String,
+    pub url: String,
+    pub logger: Logger,
+    _PRIVATE: (),
 }
 
-impl ConnectParams{
 
 
-    pub fn from_url(in_url: &str) -> Result<ConnectParams, ()> {
-        let in_url = match Url::parse(in_url) {
-            Ok(url) => url,
-            Err(_) => return Err(()),
-        };
 
-        let scheme = match in_url.scheme() {
-            "http" => "http",
-            "https" => "https",
-            _   => return Err(()),
-        };
-
-        let host = match in_url.host() {
-            Some(host) => host,
-            None => return Err(()),
-        };
-
-        let port = match in_url.port() {
-            Some(port) => port,
-            None    => 8086u16,
-        };
-
-        let username = match in_url.username() {
-            "" => None,
-            u  => Some(u.to_string())
-        };
-
-        let password = match in_url.password(){
-            None => None,
-            Some(pw) => Some(pw.to_string()),
-        };
-
-        let db = in_url.path()[1..].to_string();
-
-        // Can't fail
-        let base_url = Url::parse(&format!("{}://{}:{}/", scheme, host, port )).unwrap();
-
-        let auth = match username {
-            None => Credential{username: "".to_string(), password: "".to_string(), has_auth: false},
-            Some(u) => {
-                match password {
-                    None => Credential{username: "".to_string(), password: "".to_string(), has_auth: false},
-                    Some(p) => Credential{username:u ,password:p, has_auth: true}
-                }
-            }
-        };
-
-
-        Ok(ConnectParams {
-            url: base_url,
-            credential: auth,
-            port: port,
-            db:db,
-        })
+impl<'a> From<&'a str> for ConnectParams  {
+    fn from(url: &'a str) -> ConnectParams {
+        ConnectParams {
+            url: url.to_string(),
+            logger: slog::Logger::root(
+                slog::Discard,
+                o!(),
+            ),
+            _PRIVATE: ()
+        }
     }
+}
 
+impl<'a> From<(&'a str, Logger)> for ConnectParams {
+    fn from(tuple: (&'a str, Logger)) -> ConnectParams {
+        let (url, logger) = tuple;
+        ConnectParams {
+            url: url.to_string(),
+            logger: logger,
+            _PRIVATE: (),
+        }
+    }
 }
 
 #[cfg(test)]

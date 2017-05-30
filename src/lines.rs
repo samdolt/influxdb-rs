@@ -99,9 +99,13 @@ impl LinesBuilder {
     }
 
     fn from_line(line: Lines, name: &str) -> LinesBuilder {
-       let mut obj = LinesBuilder {
-           buf: line.buf,
-       };
+        LinesBuilder::from_buf(line.buf, name)
+    }
+
+    fn from_buf(buf: String, name: &str) -> LinesBuilder {
+        let mut obj = LinesBuilder {
+            buf: buf,
+        };
 
         obj.buf.reserve(100);
 
@@ -163,6 +167,10 @@ impl LinesBuilderWithFields {
         Lines::from_line_builder_with_fields(self)
     }
 
+    pub fn add_line(mut self, name: &str) -> LinesBuilder {
+        LinesBuilder::from_buf(self.buf, name)
+    }
+
 }
 
 impl<'a> Lines {
@@ -184,6 +192,14 @@ impl<'a> Lines {
 
     pub fn as_str(&'a self) -> &'a str {
        &self.buf
+    }
+
+    pub unsafe fn from_str<T>(line: T) -> Lines where T: Into<String>  {
+        let line = line.into();
+
+        Lines {
+            buf: line,
+        }
     }
 }
 

@@ -45,21 +45,68 @@ impl Connection {
     /// let url = "http://myuser:mypassword@localhost:2994/foodb";
     /// let conn = Connection::connect(url).expect("Can't connect to influxdb");
     /// ```
-    pub fn connect(url: &str) -> Result<Connection, ()>
+    pub fn connect<T>(params: T) -> Result<Connection, ()> where T: Into<ConnectParams>
     {
-        let params = ConnectParams::from_url(url)?;
+        let params = params.into();
 
-        let version = match Connection::_ping(&params.url, &params.credential) {
+        let url = match Url::parse(&params.url) {
+            Ok(url) => url,
+            Err(_) => return Err(()),
+        };
+
+        let scheme = match url.scheme() {
+            "http" => "http",
+            "https" => "https",
+            _   => return Err(()),
+        };
+
+        let host = match url.host() {
+            Some(host) => host,
+            None => return Err(()),
+        };
+
+        let port = match url.port() {
+            Some(port) => port,
+            None    => 8086u16,
+        };
+
+        let username = match url.username() {
+            "" => None,
+            u  => Some(u.to_string())
+        };
+
+        let password = match url.password(){
+            None => None,
+            Some(pw) => Some(pw.to_string()),
+        };
+
+        let db = url.path()[1..].to_string();
+
+        // Can't fail
+        let base_url = Url::parse(&format!("{}://{}:{}/", scheme, host, port )).unwrap();
+
+        let auth = match username {
+            None => Credential{username: "".to_string(), password: "".to_string(), has_auth: false},
+            Some(u) => {
+                match password {
+                    None => Credential{username: "".to_string(), password: "".to_string(), has_auth: false},
+                    Some(p) => Credential{username:u ,password:p, has_auth: true}
+                }
+            }
+        };
+
+
+        let version = match Connection::_ping(&url, &auth) {
             Some(v) => v,
             None    => return Err(()),
         };
 
         Ok(Connection {
-            url: params.url,
-            auth: params.credential,
+            url: url.clone(),
+            auth: auth,
             version: version,
             client: Client::new().unwrap(),
-            db: params.db,
+            db: db,
         })
     }
 
