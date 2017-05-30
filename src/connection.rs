@@ -85,15 +85,22 @@ impl Connection {
             u  => Some(u.to_string())
         };
 
+        info!(params.logger, "Username parsed");
+
         let password = match url.password(){
             None => None,
             Some(pw) => Some(pw.to_string()),
         };
 
+        info!(params.logger, "Username parsed");
+
         let db = url.path()[1..].to_string();
+
+        info!(params.logger, "db parsed");
 
         // Can't fail
         let base_url = Url::parse(&format!("{}://{}:{}/", scheme, host, port )).unwrap();
+        info!(params.logger, "Base Url recreated");
 
         let auth = match username {
             None => Credential{username: "".to_string(), password: "".to_string(), has_auth: false},
@@ -104,6 +111,8 @@ impl Connection {
                 }
             }
         };
+
+        info!(params.logger, "Auth parsed");
 
 
         let version = match Connection::_ping(&url, &auth) {
