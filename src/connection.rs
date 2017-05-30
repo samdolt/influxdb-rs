@@ -179,10 +179,15 @@ impl Connection {
             Ok(r) => {
                 match r.status() {
                     &StatusCode::NoContent => Ok(()),
-                    _ => Err(()),
+                    _ => {
+                        error!(self.logger, "Wrong status code");
+                        Err(())},
                 }
             },
-            Err(_) => Err(()),
+            Err(E) => {
+                error!(self.logger, "E: {}", E);
+                Err(())
+            },
         }
     }
 }
