@@ -115,7 +115,7 @@ impl Connection {
         info!(params.logger, "Auth parsed");
 
 
-        let version = match Connection::_ping(&url, &auth) {
+        let version = match Connection::_ping(&base_url, &auth) {
             Some(v) => v,
             None    => return Err(()),
         };
