@@ -56,21 +56,29 @@ impl Connection {
             Err(_) => return Err(()),
         };
 
+        info!(params.logger, "Url parsed");
+
         let scheme = match url.scheme() {
             "http" => "http",
             "https" => "https",
             _   => return Err(()),
         };
 
+        info!(params.logger, "Scheme parsed");
+
         let host = match url.host() {
             Some(host) => host,
             None => return Err(()),
         };
 
+        info!(params.logger, "Host parsed");
+
         let port = match url.port() {
             Some(port) => port,
             None    => 8086u16,
         };
+
+        info!(params.logger, "Port parsed");
 
         let username = match url.username() {
             "" => None,

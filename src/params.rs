@@ -45,10 +45,4 @@ impl<'a> From<(&'a str, Logger)> for ConnectParams {
 mod tests {
     pub use super::*;
 
-    #[test]
-    fn test_connectparams_from_url() {
-        let basic = ConnectParams::from_url("http://localhost").unwrap();
-        let auth = ConnectParams::from_url("http://a:b@localhost").unwrap();
-        assert!(auth.credential.has_auth)
-    }
 }
