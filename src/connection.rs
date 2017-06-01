@@ -13,6 +13,8 @@ use ::ConnectParams;
 use ::Credential;
 
 use ::Lines;
+use ::Result;
+use ::ErrorKind;
 
 
 pub struct Connection {
@@ -46,28 +48,25 @@ impl Connection {
     /// let url = "http://myuser:mypassword@localhost:2994/foodb";
     /// let conn = Connection::connect(url).expect("Can't connect to influxdb");
     /// ```
-    pub fn connect<T>(params: T) -> Result<Connection, ()> where T: Into<ConnectParams>
+    pub fn connect<T>(params: T) -> Result<Connection> where T: Into<ConnectParams>
     {
         let params = params.into();
 
-        let url = match Url::parse(&params.url) {
-            Ok(url) => url,
-            Err(_) => return Err(()),
-        };
+        let url = Url::parse(&params.url)?;
 
         debug!(params.logger, "Url parsed");
 
         let scheme = match url.scheme() {
             "http" => "http",
             "https" => "https",
-            _   => return Err(()),
+            x   => return Err(ErrorKind::UnsupportedProtocol(x.to_string()).into()),
         };
 
         debug!(params.logger, "Scheme parsed");
 
         let host = match url.host() {
             Some(host) => host,
-            None => return Err(()),
+            None => return Err(ErrorKind::InvalidUrl(url.to_string()).into()),
         };
 
         debug!(params.logger, "Host parsed");
@@ -114,10 +113,7 @@ impl Connection {
         debug!(params.logger, "Auth parsed");
 
 
-        let version = match Connection::_ping(&base_url, &auth) {
-            Some(v) => v,
-            None    => return Err(()),
-        };
+        let version = Connection::_ping(&base_url, &auth)?;
 
         debug!(params.logger, "Version recupered");
 
@@ -135,7 +131,7 @@ impl Connection {
         })
     }
 
-    fn _ping(base_url: &Url, auth: &Credential) -> Option<Version> {
+    fn _ping(base_url: &Url, auth: &Credential) -> Result<Version> {
 
         let join = if auth.has_auth {
             format!("ping?u={}&p={}", auth.username, auth.password)
@@ -143,51 +139,35 @@ impl Connection {
             "ping".to_string()
         };
 
-        let endpoint = base_url.join(&join).unwrap();
+        let endpoint = base_url.join(&join)?;
 
-        match get(endpoint) {
-            Ok(response) => {
+        let response = get(endpoint)?;
                 match *response.status() {
                     StatusCode::NoContent => (),
-                    _ => return None,
+                    x => return Err(ErrorKind::HttpError(x.to_string()).into()),
                 };
 
                 match response.headers().get::<XInfluxDbVersion>() {
-                   Some(v) => match Version::parse(v) {
-                       Ok(v) => Some(v),
-                       Err(_) => None,
-                   },
-
-                    None => None,
+                   Some(v) => Ok(Version::parse(v)?),
+                    None => Err(ErrorKind::InvalidVersionHeader.into()),
                 }
 
-            },
-            Err(_) => None,
-        }
 
     }
 
-    pub fn write(&self, lines: &Lines) -> Result<(),()> {
+    pub fn write(&self, lines: &Lines) -> Result<()> {
         let url = self.url.join(&format!("write?db={}", self.db)).unwrap();
         debug!(self.logger.new(o!("url" => url.to_string())), "New write url");
         let lines = lines.as_str();
         info!(self.logger, "Write lines {}", lines);
-        let response = self.client.post(url).body(lines).send();
+        let response = self.client.post(url).body(lines).send()?;
 
-        match response {
-            Ok(r) => {
-                match r.status() {
+                match response.status() {
                     &StatusCode::NoContent => Ok(()),
-                    _ => {
+                    x => {
                         error!(self.logger, "Wrong status code");
-                        Err(())},
+                        Err(ErrorKind::HttpError(x.to_string()).into())},
                 }
-            },
-            Err(e) => {
-                error!(self.logger, "E: {}", e);
-                Err(())
-            },
-        }
     }
 }
 

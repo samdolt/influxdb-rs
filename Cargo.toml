@@ -9,6 +9,7 @@ hyper = "0.10"
 url = "1.4.0"
 semver = "0.7.0"
 slog = "2"
+error-chain = "0.10"
 
 [features]
 default = []

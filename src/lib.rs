@@ -53,12 +53,13 @@ extern crate reqwest;
 extern crate url;
 extern crate semver;
 #[macro_use] extern crate slog;
+#[macro_use] extern crate error_chain;
 
 mod params;
 mod connection;
 mod lines;
 mod values;
-
+mod errors;
 
 pub use connection::Connection;
 pub use params::ConnectParams;
@@ -66,6 +67,8 @@ pub use params::Credential;
 pub use lines::LinesBuilder;
 pub use lines::Lines;
 pub use values::Value;
+
+pub use errors::{Error, ErrorKind, ResultExt, Result};
 
 mod headers;
 

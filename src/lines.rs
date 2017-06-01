@@ -8,6 +8,7 @@ pub struct LinesBuilderWithFields {
    buf: String
 }
 
+
 pub struct Lines {
     buf: String
 }
