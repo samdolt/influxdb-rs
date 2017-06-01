@@ -1,19 +1,21 @@
-//! A pure Rust frontend for InfluxDB
+//! InfluxDB is a popular time series database created by InfluxData.
+//!
+//! This crate is a wrapper around the http api of InfluxDb
 //!
 //! # InfluxDB version
 //!
-//! This library support InfluxDB v.1.2.x
+//! This library support `InfluxDB` v.1.2.x
 //!
 //! # SSL/TLS
 //!
-//! For now, using https to connect with InfluxDB is untested
+//! For now, using https to connect with `InfluxDB` is untested
 //!
 //! # Write using the Line Protocol
 //!
 //! ## With LinesBuilder
 //!
-//! LinesBuilder is a type safe abstraction over the Line Protocol. Whenever possible, it is
-//! recommended to build line with LinesBuilder.
+//! `LinesBuilder` is a type safe abstraction over the Line Protocol. Whenever possible, it is
+//! recommended to build line with `LinesBuilder`.
 //!
 //! ```rust,no_run
 //! extern crate influxdb;
@@ -55,6 +57,7 @@ extern crate semver;
 mod params;
 mod connection;
 mod lines;
+mod values;
 
 
 pub use connection::Connection;
@@ -62,11 +65,7 @@ pub use params::ConnectParams;
 pub use params::Credential;
 pub use lines::LinesBuilder;
 pub use lines::Lines;
+pub use values::Value;
 
 mod headers;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {}
-}

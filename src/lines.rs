@@ -1,64 +1,4 @@
-pub enum Value {
-    Float(f64),
-    Integer(i64),
-    String(String),
-    Boolean(bool),
-}
-
-impl Value {
-    fn add_to_buf(self, buf: &mut String) {
-       match self {
-           Value::Float(f) => buf.push_str(&format!("{}", f)),
-           Value::Integer(i) => buf.push_str(&format!("{}i", i)),
-           Value::String(s) => {
-               buf.push('"');
-               for c in s.chars() {
-                   match c {
-                       '"' => buf.push_str("\\\""),
-                       c   => buf.push(c),
-                   };
-               };
-               buf.push('"');
-           },
-           Value::Boolean(b) => {
-               match b {
-                   true => buf.push('t'),
-                   false => buf.push('f'),
-               }
-           }
-       }
-    }
-}
-
-impl From<f64> for Value {
-    fn from(number: f64) ->  Value {
-        Value::Float(number)
-    }
-}
-
-impl From<i64> for Value {
-    fn from(number: i64) -> Value {
-        Value::Integer(number)
-    }
-}
-
-impl From<String> for Value {
-    fn from(s: String) -> Value {
-        Value::String(s)
-    }
-}
-
-impl<'a> From<&'a str> for Value {
-    fn from(s: &'a str) -> Value {
-        Value::String(s.to_string())
-    }
-}
-
-impl From<bool> for Value {
-    fn from(b: bool) -> Value {
-        Value::Boolean(b)
-    }
-}
+use ::Value;
 
 pub struct LinesBuilder {
     buf: String
@@ -87,14 +27,14 @@ fn escape_and_push(string: &str, buf: &mut String) {
 impl LinesBuilder {
     pub fn new(measurement: &str) -> LinesBuilder {
 
-        let mut buf = String::with_capacity(100);
+        let buf = String::with_capacity(100);
 
 
         let mut obj = LinesBuilder {
             buf: buf
         };
 
-        obj.init(&measurement);
+        obj.init(measurement);
         obj
     }
 
@@ -112,7 +52,7 @@ impl LinesBuilder {
         if obj.buf != "" {
             obj.buf.push('\n');
         }
-        obj.init(&name);
+        obj.init(name);
         obj
     }
 
@@ -163,11 +103,11 @@ impl LinesBuilderWithFields {
         self
     }
 
-    pub fn build(mut self) -> Lines {
+    pub fn build(self) -> Lines {
         Lines::from_line_builder_with_fields(self)
     }
 
-    pub fn add_line(mut self, name: &str) -> LinesBuilder {
+    pub fn add_line(self, name: &str) -> LinesBuilder {
         LinesBuilder::from_buf(self.buf, name)
     }
 
@@ -186,7 +126,7 @@ impl<'a> Lines {
         }
     }
 
-    pub fn add_line(mut self, name: &str) -> LinesBuilder {
+    pub fn add_line(self, name: &str) -> LinesBuilder {
         LinesBuilder::from_line(self, name)
     }
 

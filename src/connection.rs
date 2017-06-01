@@ -1,5 +1,4 @@
 use url::Url;
-use url::form_urlencoded::byte_serialize;
 
 use semver::Version;
 use reqwest::get;
@@ -148,8 +147,8 @@ impl Connection {
 
         match get(endpoint) {
             Ok(response) => {
-                match response.status() {
-                    &StatusCode::NoContent => (),
+                match *response.status() {
+                    StatusCode::NoContent => (),
                     _ => return None,
                 };
 
@@ -184,8 +183,8 @@ impl Connection {
                         Err(())},
                 }
             },
-            Err(E) => {
-                error!(self.logger, "E: {}", E);
+            Err(e) => {
+                error!(self.logger, "E: {}", e);
                 Err(())
             },
         }

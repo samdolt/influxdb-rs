@@ -1,4 +1,3 @@
-use url::Url;
 use slog::Logger;
 use slog;
 
@@ -11,7 +10,7 @@ pub struct Credential {
 pub struct ConnectParams {
     pub url: String,
     pub logger: Logger,
-    _PRIVATE: (),
+    _private: (),
 }
 
 
@@ -25,7 +24,7 @@ impl<'a> From<&'a str> for ConnectParams  {
                 slog::Discard,
                 o!(),
             ),
-            _PRIVATE: ()
+            _private: ()
         }
     }
 }
@@ -36,7 +35,7 @@ impl<'a> From<(&'a str, Logger)> for ConnectParams {
         ConnectParams {
             url: url.to_string(),
             logger: logger,
-            _PRIVATE: (),
+            _private: (),
         }
     }
 }
